@@ -1,0 +1,20 @@
+---
+
+machine:
+  pre:
+    - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
+    - pip install --upgrade pip
+    - pip install docker-compose
+
+  services:
+    - docker
+
+deployment:
+  release:
+    tag: /[0-9]+(\.[0-9]+)*/
+    owner: NeonsIo
+    commands:
+      - docker build -f Dockerfile -t neons/load-balancer:$CIRCLE_TAG .
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker tag neons/load-balancer:$CIRCLE_TAG neons/load-balancer:latest
+      - docker push neons/load-balancer
